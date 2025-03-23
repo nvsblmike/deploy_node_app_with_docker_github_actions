@@ -6,7 +6,36 @@ const bodyParser = require('body-parser');
 const adminData = require('./routes/admin');
 const shopRoutes = require('./routes/shop');
 
+const client = require('prom-client');
+
 const app = express();
+
+// Create a Registry to register metrics
+const register = new client.Registry();
+
+// Expose the `/metrics` endpoint
+app.use('/metrics', async (req, res, next) => {
+    try {
+      res.set('Content-Type', register.contentType);
+      res.end(await register.metrics());
+    } catch (err) {
+      next(err); // Pass errors to Express error handler
+    }
+  });
+
+// Enable the collection of default metrics (CPU, memory, etc.)
+client.collectDefaultMetrics({ register });
+
+
+
+// Define a custom metric (Example: HTTP request counter)
+const httpRequestCounter = new client.Counter({
+  name: 'http_requests_total',
+  help: 'Total number of HTTP requests',
+  labelNames: ['method', 'route', 'status_code'],
+});
+
+register.registerMetric(httpRequestCounter);
 
 //  This helps in parsing text kind of data in json format
 app.use(bodyParser.urlencoded({ extended: false }));

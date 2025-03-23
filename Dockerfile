@@ -10,6 +10,8 @@ COPY package*.json ./
 # Install dependencies
 RUN npm install --production
 
+RUN npm install prom-client
+
 # Copy the rest of the application files
 COPY . .
 
