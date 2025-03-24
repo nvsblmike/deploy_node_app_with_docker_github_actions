@@ -13,6 +13,18 @@ const app = express();
 // Create a Registry to register metrics
 const register = new client.Registry();
 
+// Enable the collection of default metrics (CPU, memory, etc.)
+client.collectDefaultMetrics({ register });
+
+// Define a custom metric (Example: HTTP request counter)
+const httpRequestCounter = new client.Counter({
+    name: 'http_requests_total',
+    help: 'Total number of HTTP requests',
+    labelNames: ['method', 'route', 'status_code'],
+  });
+  
+register.registerMetric(httpRequestCounter);
+
 // Expose the `/metrics` endpoint
 app.use('/metrics', async (req, res, next) => {
     try {
@@ -21,21 +33,7 @@ app.use('/metrics', async (req, res, next) => {
     } catch (err) {
       next(err); // Pass errors to Express error handler
     }
-  });
-
-// Enable the collection of default metrics (CPU, memory, etc.)
-client.collectDefaultMetrics({ register });
-
-
-
-// Define a custom metric (Example: HTTP request counter)
-const httpRequestCounter = new client.Counter({
-  name: 'http_requests_total',
-  help: 'Total number of HTTP requests',
-  labelNames: ['method', 'route', 'status_code'],
 });
-
-register.registerMetric(httpRequestCounter);
 
 //  This helps in parsing text kind of data in json format
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -52,4 +50,4 @@ app.use((req, res, next) => {
     res.status(404).sendFile(path.join(__dirname,'views','404.html'));
 });
 
-app.listen(3000);
+app.listen(3000, '0.0.0.0');
