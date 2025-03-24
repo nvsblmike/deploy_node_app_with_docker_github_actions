@@ -16,6 +16,8 @@ const register = new client.Registry();
 // Enable the collection of default metrics (CPU, memory, etc.)
 client.collectDefaultMetrics({ register });
 
+console.log('Prometheus metrics enabled');
+
 // Define a custom metric (Example: HTTP request counter)
 const httpRequestCounter = new client.Counter({
     name: 'http_requests_total',
@@ -25,10 +27,12 @@ const httpRequestCounter = new client.Counter({
   
 register.registerMetric(httpRequestCounter);
 
+
+
 // Expose the `/metrics` endpoint
 app.use('/metrics', async (req, res, next) => {
     try {
-      res.set('Content-Type', register.contentType);
+      res.setHeader('Content-Type', register.contentType);
       res.end(await register.metrics());
     } catch (err) {
       next(err); // Pass errors to Express error handler
