@@ -32,8 +32,9 @@ register.registerMetric(httpRequestCounter);
 // Expose the `/metrics` endpoint
 app.use('/metrics', async (req, res, next) => {
     try {
+      res.setHeader('Access-Control-Allow-Origin', '*');
       res.setHeader('Content-Type', register.contentType);
-      res.end(await register.metrics());
+      res.status(200).send(await register.metrics());
     } catch (err) {
       next(err); // Pass errors to Express error handler
     }
